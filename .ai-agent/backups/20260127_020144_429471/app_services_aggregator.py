@@ -72,29 +72,27 @@ class ContentAggregator:
             interests = self.db_session.query(UserInterest).filter_by(
                 user_id=user_id
             ).all()
-
+            
             if not interests:
                 return []
-
+            
             now = datetime.utcnow()
             scored_interests = []
-
+            
             for interest in interests:
-                # Защита от None в last_used - использовать created_at или now как fallback
-                last_used = interest.last_used or interest.created_at or now
-                days_unused = (now - last_used).days
+                days_unused = (now - interest.last_used).days
                 decay_factor = 0.9 ** (days_unused / 30)
                 adjusted_priority = interest.priority * decay_factor
-
+                
                 scored_interests.append({
                     'tag_name': interest.tag_name,
                     'adjusted_priority': adjusted_priority
                 })
-
+            
             scored_interests.sort(key=lambda x: x['adjusted_priority'], reverse=True)
             top_tags = [item['tag_name'] for item in scored_interests[:limit]]
             return top_tags
-
+            
         except Exception as e:
             logger.error(f"Ошибка получения топ интересов для пользователя {user_id}: {e}")
             fallback = self.db_session.query(UserInterest).filter_by(user_id=user_id).all()
@@ -110,9 +108,7 @@ class ContentAggregator:
             now = datetime.utcnow()
             scored = []
             for interest in all_interests:
-                # Защита от None в last_used - использовать created_at или now как fallback
-                last_used = interest.last_used or interest.created_at or now
-                days_unused = (now - last_used).days
+                days_unused = (now - interest.last_used).days
                 decay_factor = 0.9 ** (days_unused / 30)
                 adjusted_priority = interest.priority * decay_factor
                 scored.append((interest, adjusted_priority))
