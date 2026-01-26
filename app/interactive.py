@@ -1,8 +1,30 @@
+import os
+import re
+import logging
+import webbrowser
+from datetime import datetime
+from pathlib import Path
+from typing import List, Optional, Dict, Any
+
+from sqlalchemy import func
+import click
+from colorama import init, Fore, Back, Style
+from docx import Document
+
 from app.database import (
-    get_db_session, User, ContentItem, UserInterest, 
-    UserProgress, Tag, SessionLocal, UserSettings, 
+    get_db_session, User, ContentItem, UserInterest,
+    UserProgress, Tag, SessionLocal, UserSettings,
     FavoriteContent, SearchQuery
 )
+from app.services.aggregator import ContentAggregator, update_all_content
+from app.services.recommender import ContentRecommender
+from app.services.email_sender import EmailSender
+from app.config import settings
+from app.sources.youtube import YouTubeSource
+from app.sources.habr import HabrSource
+from app.sources.coursera import CourseraSource
+
+logger = logging.getLogger(__name__)
 from app.database import (
     get_db_session, User, ContentItem, UserInterest, 
     UserProgress, Tag, SessionLocal, UserSettings, FavoriteContent
@@ -131,8 +153,24 @@ class InteractiveMenu:
                 self._display_article(digest[idx])
 
     def search_content(self) -> None:
-        """Поиск контента с возможностью выбора и просмотра статьи."""
-        query = input(Fore.YELLOW + "Поиск: ").strip()
+        """Поиск контента с выбором источника и возможностью скачивания."""
+        print(Fore.CYAN + "\nИСТОЧНИК ПОИСКА:")
+        print(f"{Fore.YELLOW}1.{Fore.WHITE} Поиск в базе данных")
+        print(f"{Fore.YELLOW}2.{Fore.WHITE} Поиск в Habr (интернет)")
+        print(f"{Fore.YELLOW}0.{Fore.WHITE} Назад")
+
+        source_choice = input(Fore.YELLOW + "\nВыбор: ").strip()
+
+        if source_choice == "0" or not source_choice:
+            return
+        elif source_choice == "1":
+            self._search_in_db()
+        elif source_choice == "2":
+            self._search_in_habr()
+
+    def _search_in_db(self) -> None:
+        """Поиск контента в базе данных."""
+        query = input(Fore.YELLOW + "Поиск в БД: ").strip()
         if not query:
             return
 
@@ -145,10 +183,10 @@ class InteractiveMenu:
 
         results = self.aggregator.search_content([query])
         if not results:
-            print(Fore.YELLOW + "Ничего не найдено.")
+            print(Fore.YELLOW + "Ничего не найдено в БД.")
             return
 
-        print(Fore.CYAN + f"\nНАЙДЕНО {len(results)} РЕЗУЛЬТАТОВ:")
+        print(Fore.CYAN + f"\nНАЙДЕНО В БД: {len(results)} РЕЗУЛЬТАТОВ:")
         for i, item in enumerate(results, 1):
             platform_info = f" ({item.platform})" if item.platform else ""
             print(f"{Fore.YELLOW}{i}.{Fore.WHITE} {item.title}{platform_info}")
@@ -161,6 +199,35 @@ class InteractiveMenu:
             idx = int(choice) - 1
             if 0 <= idx < len(results):
                 self._display_article(results[idx])
+
+    def _search_in_habr(self) -> None:
+        """Поиск контента в Habr (интернет)."""
+        query = input(Fore.YELLOW + "Поиск в Habr: ").strip()
+        if not query:
+            return
+
+        # Track search interest if user is logged in
+        if self.current_user_id:
+            try:
+                self.aggregator.track_search_query(self.current_user_id, query)
+            except Exception as e:
+                print(f"{Fore.RED}Ошибка отслеживания интересов: {e}")
+
+        print(Fore.CYAN + "\nПОИСК В HABR...")
+
+        # Поиск в Habr
+        habr_source = self.sources["habr"]["instance"]
+        keywords = [kw.strip() for kw in query.split() if kw.strip()]
+        articles = habr_source.fetch_content(keywords, max_results=30)
+
+        if not articles:
+            print(Fore.YELLOW + "Ничего не найдено в Habr.")
+            return
+
+        # Сортировать по дате публикации
+        articles.sort(key=lambda x: x.published_at or datetime.min, reverse=True)
+
+        self._display_habr_articles_with_download(articles, f"РЕЗУЛЬТАТЫ ПОИСКА В HABR: '{query}'")
 
     def _display_article(self, item: ContentItem) -> None:
         """Отобразить полную информацию о статье с возможностью экспорта."""
@@ -261,19 +328,35 @@ class InteractiveMenu:
             print(Fore.GREEN + f"✓ Coursera {status}")
 
     def show_recommendations(self) -> None:
-        """Показать персонализированные рекомендации."""
+        """Показать персонализированные рекомендации с выбором источника."""
         if not self.current_user_id:
             print(Fore.RED + "Сначала выберите пользователя в настройках.")
             return
 
-        print(Fore.CYAN + "\nПОЛУЧЕНИЕ РЕКОМЕНДАЦИЙ...")
-        recommendations = self.recommender.get_recommendations(self.current_user_id, max_recommendations=10)
+        print(Fore.CYAN + "\nИСТОЧНИК РЕКОМЕНДАЦИЙ:")
+        print(f"{Fore.YELLOW}1.{Fore.WHITE} Из базы данных (сохранённые статьи)")
+        print(f"{Fore.YELLOW}2.{Fore.WHITE} Из Habr (интернет, свежие статьи)")
+        print(f"{Fore.YELLOW}0.{Fore.WHITE} Назад")
+
+        source_choice = input(Fore.YELLOW + "\nВыбор: ").strip()
+
+        if source_choice == "0" or not source_choice:
+            return
+        elif source_choice == "1":
+            self._show_db_recommendations()
+        elif source_choice == "2":
+            self._show_habr_recommendations()
+
+    def _show_db_recommendations(self) -> None:
+        """Показать рекомендации из базы данных."""
+        print(Fore.CYAN + "\nПОЛУЧЕНИЕ РЕКОМЕНДАЦИЙ ИЗ БД...")
+        recommendations = self.recommender.get_recommendations(self.current_user_id, max_recommendations=25)
 
         if not recommendations:
-            print(Fore.YELLOW + "Нет рекомендаций. Попробуйте добавить интересы или просмотреть контент.")
+            print(Fore.YELLOW + "Нет рекомендаций в БД. Попробуйте загрузить статьи из Habr.")
             return
 
-        print(Fore.CYAN + f"\nРЕКОМЕНДАЦИИ ДЛЯ ВАС ({len(recommendations)}):")
+        print(Fore.CYAN + f"\nРЕКОМЕНДАЦИИ ИЗ БД ({len(recommendations)}):")
         for i, item in enumerate(recommendations, 1):
             platform_info = f" ({item.platform})" if item.platform else ""
             print(f"{Fore.YELLOW}{i}.{Fore.WHITE} {item.title}{platform_info}")
@@ -286,6 +369,176 @@ class InteractiveMenu:
             idx = int(choice) - 1
             if 0 <= idx < len(recommendations):
                 self._display_article(recommendations[idx])
+
+    def _show_habr_recommendations(self) -> None:
+        """Показать рекомендации из Habr (интернет) на основе интересов пользователя."""
+        print(Fore.CYAN + "\nПОЛУЧЕНИЕ РЕКОМЕНДАЦИЙ ИЗ HABR...")
+
+        # Получить топ интересов пользователя (лимит 90 для API)
+        keywords = self.aggregator.get_top_interests(self.current_user_id, 90)
+        if not keywords:
+            print(Fore.YELLOW + "У вас нет настроенных интересов. Добавьте интересы в настройках.")
+            return
+
+        print(Fore.WHITE + f"Поиск по интересам: {', '.join(keywords[:5])}{'...' if len(keywords) > 5 else ''}")
+
+        # Получить статьи из Habr (минимум 25)
+        habr_source = self.sources["habr"]["instance"]
+        articles = habr_source.fetch_content(keywords, max_results=30)
+
+        if not articles:
+            print(Fore.YELLOW + "Не удалось найти статьи по вашим интересам.")
+            return
+
+        # Сортировать по дате публикации (свежие первыми)
+        articles.sort(key=lambda x: x.published_at or datetime.min, reverse=True)
+
+        # Показать минимум 25 статей (или все, если меньше)
+        display_count = min(len(articles), max(25, len(articles)))
+        articles = articles[:display_count]
+
+        self._display_habr_articles_with_download(articles, "РЕКОМЕНДАЦИИ ИЗ HABR")
+
+    def _display_habr_articles_with_download(self, articles: List[ContentItem], title: str) -> None:
+        """Отобразить список статей из Habr с возможностью скачивания в БД."""
+        while True:
+            print(Fore.CYAN + f"\n{title} ({len(articles)} статей):")
+            for i, item in enumerate(articles, 1):
+                # Проверить, есть ли уже в БД
+                exists = self.session.query(ContentItem).filter_by(
+                    source_id=item.source_id, platform=item.platform
+                ).first()
+                status = Fore.GREEN + " [В БД]" if exists else ""
+                date_str = item.published_at.strftime('%d.%m') if item.published_at else ""
+                print(f"{Fore.YELLOW}{i}.{Fore.WHITE} {item.title[:60]}{'...' if len(item.title) > 60 else ''} {Fore.CYAN}{date_str}{status}")
+
+            print(f"\n{Fore.YELLOW}номер{Fore.WHITE} - просмотреть статью")
+            print(f"{Fore.YELLOW}s номера{Fore.WHITE} - скачать статьи в БД (например: s 1 3 5 или s 1-10)")
+            print(f"{Fore.YELLOW}sa{Fore.WHITE} - скачать все статьи в БД")
+            print(f"{Fore.YELLOW}0{Fore.WHITE} - назад")
+
+            choice = input(Fore.YELLOW + "\nВыбор: ").strip().lower()
+
+            if choice == "0":
+                return
+            elif choice == "sa":
+                self._save_articles_to_db(articles)
+            elif choice.startswith("s "):
+                indices = self._parse_indices(choice[2:], len(articles))
+                selected = [articles[i] for i in indices if i < len(articles)]
+                if selected:
+                    self._save_articles_to_db(selected)
+            elif choice.isdigit():
+                idx = int(choice) - 1
+                if 0 <= idx < len(articles):
+                    self._display_habr_article_preview(articles[idx])
+
+    def _parse_indices(self, input_str: str, max_idx: int) -> List[int]:
+        """Парсинг индексов из строки (поддержка диапазонов: 1-5, отдельных: 1 3 5)."""
+        indices = set()
+        parts = input_str.replace(",", " ").split()
+        for part in parts:
+            if "-" in part:
+                try:
+                    start, end = part.split("-")
+                    for i in range(int(start) - 1, min(int(end), max_idx)):
+                        indices.add(i)
+                except ValueError:
+                    continue
+            elif part.isdigit():
+                idx = int(part) - 1
+                if 0 <= idx < max_idx:
+                    indices.add(idx)
+        return sorted(indices)
+
+    def _save_articles_to_db(self, articles: List[ContentItem]) -> None:
+        """Сохранить статьи в БД и обновить интересы пользователя."""
+        saved_count = 0
+        saved_items = []
+
+        for item in articles:
+            exists = self.session.query(ContentItem).filter_by(
+                source_id=item.source_id, platform=item.platform
+            ).first()
+            if not exists:
+                # Обработка тегов
+                new_tags = []
+                for tag in (item.tags or []):
+                    tag_name = tag.name.lower() if tag.name else ""
+                    if tag_name:
+                        db_tag = self.session.query(Tag).filter_by(name=tag_name).first()
+                        if not db_tag:
+                            db_tag = Tag(name=tag_name)
+                            self.session.add(db_tag)
+                        new_tags.append(db_tag)
+                item.tags = new_tags
+                self.session.add(item)
+                saved_items.append(item)
+                saved_count += 1
+
+        if saved_count > 0:
+            self.session.commit()
+            print(Fore.GREEN + f"✓ Сохранено {saved_count} статей в БД")
+
+            # Обновить интересы пользователя на основе тегов сохранённых статей
+            if self.current_user_id:
+                self.aggregator.add_user_interests_from_content(self.current_user_id, saved_items)
+                print(Fore.CYAN + "✓ Интересы обновлены на основе тегов статей")
+        else:
+            print(Fore.YELLOW + "Все выбранные статьи уже есть в БД")
+
+    def _display_habr_article_preview(self, item: ContentItem) -> None:
+        """Показать превью статьи из Habr с возможностью скачивания."""
+        print(Fore.CYAN + "\n" + "═"*60)
+        print(Fore.GREEN + f"ЗАГОЛОВОК: {item.title}")
+        print(Fore.WHITE + f"URL: {item.url or 'Нет ссылки'}")
+
+        if item.published_at:
+            print(Fore.WHITE + f"Опубликовано: {item.published_at.strftime('%Y-%m-%d %H:%M')}")
+
+        if item.tags:
+            tags_str = ", ".join([t.name for t in item.tags[:10]])
+            print(Fore.WHITE + f"Теги: {tags_str}")
+
+        print(Fore.CYAN + "\n" + "-"*60)
+        print(Fore.WHITE + "ОПИСАНИЕ:")
+        print(item.description or "Нет описания")
+
+        if item.full_text:
+            print(Fore.CYAN + "\n" + "-"*60)
+            print(Fore.WHITE + "ПОЛНЫЙ ТЕКСТ (первые 1500 символов):")
+            print(item.full_text[:1500] + ("..." if len(item.full_text) > 1500 else ""))
+
+        print(Fore.CYAN + "\n" + "═"*60)
+
+        # Проверить, есть ли уже в БД
+        exists = self.session.query(ContentItem).filter_by(
+            source_id=item.source_id, platform=item.platform
+        ).first()
+
+        if exists:
+            print(Fore.GREEN + "✓ Эта статья уже сохранена в БД")
+            print(f"{Fore.YELLOW}1.{Fore.WHITE} Открыть в браузере")
+            print(f"{Fore.YELLOW}0.{Fore.WHITE} Назад")
+        else:
+            print(f"{Fore.YELLOW}1.{Fore.WHITE} Скачать в БД")
+            print(f"{Fore.YELLOW}2.{Fore.WHITE} Открыть в браузере")
+            print(f"{Fore.YELLOW}0.{Fore.WHITE} Назад")
+
+        action = input(Fore.YELLOW + "\nДействие: ").strip()
+
+        if exists:
+            if action == "1" and item.url:
+                import webbrowser
+                webbrowser.open(item.url)
+                print(Fore.GREEN + "✓ Открыто в браузере")
+        else:
+            if action == "1":
+                self._save_articles_to_db([item])
+            elif action == "2" and item.url:
+                import webbrowser
+                webbrowser.open(item.url)
+                print(Fore.GREEN + "✓ Открыто в браузере")
 
     def show_statistics(self) -> None:
         """Показать статистику пользователя."""
@@ -376,11 +629,16 @@ class InteractiveMenu:
                         self._display_article(article)
 
     def configure_user_settings(self) -> None:
+        """Настройка параметров пользователя."""
         while True:
             print(Fore.CYAN + "\nНАСТРОЙКИ ПОЛЬЗОВАТЕЛЯ")
-            print(f"{Fore.YELLOW}1.{Fore.WHITE} Выбор пользователя\n{Fore.YELLOW}2.{Fore.WHITE} Настройки email\n{Fore.YELLOW}3.{Fore.WHITE} Управление интересами\n{Fore.YELLOW}6.{Fore.WHITE} Назад")
+            print(f"{Fore.YELLOW}1.{Fore.WHITE} Выбор пользователя")
+            print(f"{Fore.YELLOW}2.{Fore.WHITE} Настройки email")
+            print(f"{Fore.YELLOW}3.{Fore.WHITE} Управление интересами")
+            print(f"{Fore.YELLOW}4.{Fore.WHITE} Автозагрузка статей")
+            print(f"{Fore.YELLOW}6.{Fore.WHITE} Назад")
             choice = input(Fore.YELLOW + "\nВыбор: ").strip()
-            
+
             if choice == "1":
                 users = self.session.query(User).all()
                 for u in users: print(f"ID: {u.id} | {u.username}")
@@ -388,10 +646,15 @@ class InteractiveMenu:
                 if uid.isdigit():
                     self.current_user_id = int(uid)
                     self._save_current_user_id(self.current_user_id)
+            elif choice == "2":
+                if not self.current_user_id:
+                    print(Fore.RED + "Сначала выберите пользователя.")
+                    continue
+                self._configure_email_settings()
             elif choice == "3":
                 if not self.current_user_id: continue
                 user = self.session.query(User).get(self.current_user_id)
-                
+
                 # Показать текущие интересы
                 current_interests = [interest.tag_name for interest in user.interests]
                 if current_interests:
@@ -429,7 +692,7 @@ class InteractiveMenu:
                             self.session.add(interest)
                             self.session.commit()
                             print(Fore.GREEN + f"✓ Добавлен интерес: {tag_input}")
-                            
+
                             # Автоматически обрезать интересы до лимита 95 после добавления
                             try:
                                 self.aggregator._trim_interests_to_limit(user.id, 95)
@@ -437,5 +700,164 @@ class InteractiveMenu:
                                 print(Fore.CYAN + f"Текущее количество интересов: {current_count}/95")
                             except Exception as e:
                                 print(Fore.YELLOW + f"⚠ Предупреждение при обрезке интересов: {e}")
-                elif sub_choice == "3": break
-            elif choice == "6": break
+                elif sub_choice == "2":
+                    tag_input = input(Fore.YELLOW + "Введите интерес (тег) для удаления: ").strip()
+                    if tag_input:
+                        existing = self.session.query(UserInterest).filter_by(
+                            user_id=user.id, 
+                            tag_name=tag_input.lower()
+                        ).first()
+                        if existing:
+                            self.session.delete(existing)
+                            self.session.commit()
+                            print(Fore.GREEN + f"✓ Удалён интерес: {tag_input}")
+                        else:
+                            print(Fore.YELLOW + f"Интерес '{tag_input}' не найден.")
+                elif sub_choice == "3": 
+                    continue
+            elif choice == "4":
+                if not self.current_user_id:
+                    print(Fore.RED + "Сначала выберите пользователя.")
+                    continue
+                self._configure_auto_download()
+            elif choice == "6": 
+                break
+
+    def _configure_auto_download(self) -> None:
+        """Настройка автоматической загрузки статей из Habr."""
+        user = self.session.query(User).get(self.current_user_id)
+        if not user:
+            print(Fore.RED + "Пользователь не найден.")
+            return
+
+        settings = user.ensure_settings(self.session)
+
+        print(Fore.CYAN + "\nАВТОЗАГРУЗКА СТАТЕЙ ИЗ HABR")
+        print(Fore.WHITE + "Статьи загружаются автоматически по вашим интересам (лимит 90 тегов)")
+
+        current_hour = settings.auto_download_hour
+        if current_hour is not None:
+            print(Fore.GREEN + f"Текущее время автозагрузки: {current_hour}:00")
+            if settings.last_auto_download:
+                print(Fore.WHITE + f"Последняя загрузка: {settings.last_auto_download.strftime('%Y-%m-%d %H:%M')}")
+        else:
+            print(Fore.YELLOW + "Автозагрузка отключена")
+
+        print(f"\n{Fore.YELLOW}1.{Fore.WHITE} Установить час автозагрузки (0-23)")
+        print(f"{Fore.YELLOW}2.{Fore.WHITE} Отключить автозагрузку")
+        print(f"{Fore.YELLOW}3.{Fore.WHITE} Загрузить сейчас вручную")
+        print(f"{Fore.YELLOW}0.{Fore.WHITE} Назад")
+
+        choice = input(Fore.YELLOW + "\nВыбор: ").strip()
+
+        if choice == "1":
+            hour_input = input(Fore.YELLOW + "Введите час (0-23): ").strip()
+            if hour_input.isdigit():
+                hour = int(hour_input)
+                if 0 <= hour <= 23:
+                    settings.auto_download_hour = hour
+                    self.session.commit()
+                    print(Fore.GREEN + f"✓ Автозагрузка установлена на {hour}:00")
+                else:
+                    print(Fore.RED + "Час должен быть от 0 до 23")
+        elif choice == "2":
+            settings.auto_download_hour = None
+            self.session.commit()
+            print(Fore.GREEN + "✓ Автозагрузка отключена")
+        elif choice == "3":
+            self._run_manual_download()
+
+    def _run_manual_download(self) -> None:
+        """Запустить ручную загрузку статей из Habr."""
+        print(Fore.CYAN + "\nЗАГРУЗКА СТАТЕЙ ИЗ HABR...")
+
+        # Получить интересы пользователя (лимит 90)
+        keywords = self.aggregator.get_top_interests(self.current_user_id, 90)
+        if not keywords:
+            print(Fore.YELLOW + "У вас нет настроенных интересов. Добавьте интересы в настройках.")
+            return
+
+        print(Fore.WHITE + f"Поиск по {len(keywords)} интересам...")
+
+        # Получить статьи из Habr
+        habr_source = self.sources["habr"]["instance"]
+        articles = habr_source.fetch_content(keywords, max_results=50)
+
+        if not articles:
+            print(Fore.YELLOW + "Не удалось найти статьи.")
+            return
+
+        # Сортировать по дате (свежие первыми)
+        articles.sort(key=lambda x: x.published_at or datetime.min, reverse=True)
+
+        # Фильтровать уже существующие в БД
+        new_articles = []
+        for item in articles:
+            exists = self.session.query(ContentItem).filter_by(
+                source_id=item.source_id, platform=item.platform
+            ).first()
+            if not exists:
+                new_articles.append(item)
+
+        if not new_articles:
+            print(Fore.YELLOW + "Все найденные статьи уже есть в БД.")
+            return
+
+        print(Fore.CYAN + f"\nНайдено {len(new_articles)} новых статей:")
+        for i, item in enumerate(new_articles[:20], 1):
+            date_str = item.published_at.strftime('%d.%m') if item.published_at else ""
+            print(f"{Fore.YELLOW}{i}.{Fore.WHITE} {item.title[:55]}{'...' if len(item.title) > 55 else ''} {Fore.CYAN}{date_str}")
+
+        if len(new_articles) > 20:
+            print(Fore.WHITE + f"... и ещё {len(new_articles) - 20} статей")
+
+        confirm = input(Fore.YELLOW + f"\nСохранить все {len(new_articles)} статей в БД? (y/n): ").strip().lower()
+        if confirm == "y":
+            self._save_articles_to_db(new_articles)
+
+            # Обновить время последней загрузки
+            user = self.session.query(User).get(self.current_user_id)
+            if user and user.settings:
+                user.settings.last_auto_download = datetime.utcnow()
+                self.session.commit()
+
+    def _configure_email_settings(self) -> None:
+        """Настройка email для дайджестов."""
+        user = self.session.query(User).get(self.current_user_id)
+        if not user:
+            print(Fore.RED + "Пользователь не найден.")
+            return
+
+        settings = user.ensure_settings(self.session)
+
+        print(Fore.CYAN + "\nНАСТРОЙКИ EMAIL")
+        print(Fore.WHITE + f"Текущий email: {settings.email_digest}")
+        print(Fore.WHITE + f"Дайджест: {'Включен' if settings.digest_enabled else 'Отключен'}")
+        print(Fore.WHITE + f"Час отправки: {settings.digest_hour}:00")
+
+        print(f"\n{Fore.YELLOW}1.{Fore.WHITE} Изменить email")
+        print(f"{Fore.YELLOW}2.{Fore.WHITE} Переключить дайджест")
+        print(f"{Fore.YELLOW}3.{Fore.WHITE} Изменить час отправки")
+        print(f"{Fore.YELLOW}0.{Fore.WHITE} Назад")
+
+        choice = input(Fore.YELLOW + "\nВыбор: ").strip()
+
+        if choice == "1":
+            new_email = input(Fore.YELLOW + "Новый email: ").strip()
+            if new_email and "@" in new_email:
+                settings.email_digest = new_email
+                self.session.commit()
+                print(Fore.GREEN + f"✓ Email обновлён: {new_email}")
+        elif choice == "2":
+            settings.digest_enabled = not settings.digest_enabled
+            self.session.commit()
+            status = "включен" if settings.digest_enabled else "отключен"
+            print(Fore.GREEN + f"✓ Дайджест {status}")
+        elif choice == "3":
+            hour_input = input(Fore.YELLOW + "Час отправки (0-23): ").strip()
+            if hour_input.isdigit():
+                hour = int(hour_input)
+                if 0 <= hour <= 23:
+                    settings.digest_hour = hour
+                    self.session.commit()
+                    print(Fore.GREEN + f"✓ Час отправки: {hour}:00")

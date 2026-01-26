@@ -1,5 +1,6 @@
 from app.database import SessionLocal, UserSettings
 from app.database import init_database
+from app.database import init_database, SessionLocal, UserSettings
 from app.database import init_database, engine
 from colorama import init, Fore, Back, Style
 import importlib
@@ -15,11 +16,18 @@ import subprocess
 import sys
 import logging
 import argparse
+from datetime import datetime
 from pathlib import Path
 
+from colorama import Fore, Style
+
 from app.cli.commands import cli
-from app.database import init_database, SessionLocal, UserSettings
+from app.database import (
+    init_database, SessionLocal, UserSettings, 
+    User, ContentItem, Tag
+)
 from app.services.aggregator import ContentAggregator
+from app.sources.habr import HabrSource
 from app.config import settings
 
 logging.basicConfig(
@@ -28,6 +36,109 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _check_missed_auto_downloads() -> None:
+    """Проверить и выполнить пропущенные автозагрузки для всех пользователей."""
+    session = SessionLocal()
+    try:
+        # Найти пользователей с настроенной автозагрузкой
+        users_with_auto = session.query(User).join(UserSettings).filter(
+            UserSettings.auto_download_hour.isnot(None)
+        ).all()
+        
+        if not users_with_auto:
+            return
+        
+        now = datetime.utcnow()
+        habr_source = HabrSource()
+        aggregator = ContentAggregator(db_session=session)
+        
+        for user in users_with_auto:
+            user_settings = user.settings
+            if not user_settings or user_settings.auto_download_hour is None:
+                continue
+            
+            # Проверить, нужна ли загрузка
+            should_download = False
+            
+            if user_settings.last_auto_download is None:
+                # Никогда не загружали - загрузить
+                should_download = True
+            else:
+                # Проверить, прошёл ли назначенный час с последней загрузки
+                last_download_date = user_settings.last_auto_download.date()
+                today = now.date()
+                
+                if last_download_date < today:
+                    # Последняя загрузка была вчера или раньше
+                    # Проверить, прошёл ли уже назначенный час сегодня
+                    if now.hour >= user_settings.auto_download_hour:
+                        should_download = True
+            
+            if should_download:
+                logger.info(f"Running missed auto-download for user {user.id} ({user.username})")
+                
+                # Получить интересы пользователя (лимит 90)
+                keywords = aggregator.get_top_interests(user.id, 90)
+                if not keywords:
+                    logger.info(f"User {user.id} has no interests, skipping auto-download")
+                    continue
+                
+                # Получить статьи из Habr
+                articles = habr_source.fetch_content(keywords, max_results=30)
+                
+                if not articles:
+                    logger.info(f"No articles found for user {user.id}")
+                    continue
+                
+                # Сортировать по дате (свежие первыми)
+                articles.sort(key=lambda x: x.published_at or datetime.min, reverse=True)
+                
+                # Сохранить только новые статьи
+                saved_count = 0
+                saved_titles = []
+                for item in articles:
+                    exists = session.query(ContentItem).filter_by(
+                        source_id=item.source_id, platform=item.platform
+                    ).first()
+                    if not exists:
+                        # Обработка тегов
+                        new_tags = []
+                        for tag in (item.tags or []):
+                            tag_name = tag.name.lower() if tag.name else ""
+                            if tag_name:
+                                db_tag = session.query(Tag).filter_by(name=tag_name).first()
+                                if not db_tag:
+                                    db_tag = Tag(name=tag_name)
+                                    session.add(db_tag)
+                                new_tags.append(db_tag)
+                        item.tags = new_tags
+                        session.add(item)
+                        saved_count += 1
+                        saved_titles.append(item.title)
+                
+                if saved_count > 0:
+                    session.commit()
+                    logger.info(f"Auto-downloaded {saved_count} articles for user {user.id}")
+                    
+                    # Показать названия скачанных статей
+                    print(f"\n{Fore.CYAN}═══ АВТОЗАГРУЗКА ДЛЯ {user.username} ═══{Style.RESET_ALL}")
+                    print(f"{Fore.GREEN}Загружено {saved_count} новых статей:{Style.RESET_ALL}")
+                    for title in saved_titles[:10]:
+                        print(f"  • {title[:60]}{'...' if len(title) > 60 else ''}")
+                    if len(saved_titles) > 10:
+                        print(f"  ... и ещё {len(saved_titles) - 10} статей")
+                
+                # Обновить время последней загрузки
+                user_settings.last_auto_download = now
+                session.commit()
+                
+    except Exception as e:
+        logger.error(f"Error in auto-download check: {e}")
+        session.rollback()
+    finally:
+        session.close()
 
 
 def main() -> None:
@@ -102,6 +213,12 @@ def main() -> None:
                     logger.info("No missed updates detected")
             except Exception as e:
                 logger.error(f"Error checking for missed updates: {e}")
+            
+            # Check for missed auto-downloads
+            try:
+                _check_missed_auto_downloads()
+            except Exception as e:
+                logger.error(f"Error checking for missed auto-downloads: {e}")
 
         # Call Click CLI with standalone_mode=False to handle exceptions here
         cli(standalone_mode=False)

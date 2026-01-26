@@ -1,8 +1,18 @@
 from sqlalchemy import (
-    create_engine, Column, Integer, String, Text, DateTime, 
-
-
+    create_engine, Column, Integer, String, Text, DateTime,
+    Boolean, Float, ForeignKey, Table, Enum
 )
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship, sessionmaker, Session
+from sqlalchemy.sql import func
+import datetime
+import logging
+from typing import List, Optional
+from enum import Enum as PyEnum
+
+from app.config import settings
+
+logger = logging.getLogger(__name__)
 from sqlalchemy import (
     create_engine, Column, Integer, String, Text, DateTime, 
 )
@@ -263,13 +273,17 @@ class UserSettings(Base):
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
     last_content_update = Column(DateTime, nullable=True)
     auto_update_content = Column(Boolean, default=True)
+    auto_download_hour = Column(Integer, nullable=True)
+    last_auto_download = Column(DateTime, nullable=True)
 
     user = relationship("User", back_populates="settings")
 
     def __init__(self, user_id: int, email_digest: str, digest_hour: int = 9, 
                  digest_enabled: bool = True, missed_digest_send: bool = True,
                  last_content_update: Optional[datetime.datetime] = None, 
-                 auto_update_content: bool = True):
+                 auto_update_content: bool = True,
+                 auto_download_hour: Optional[int] = None,
+                 last_auto_download: Optional[datetime.datetime] = None):
         self.user_id = user_id
         self.email_digest = email_digest
         self.digest_hour = digest_hour
@@ -277,8 +291,11 @@ class UserSettings(Base):
         self.missed_digest_send = missed_digest_send
         self.last_content_update = last_content_update
         self.auto_update_content = auto_update_content
+        self.auto_download_hour = auto_download_hour
+        self.last_auto_download = last_auto_download
         self.created_at = datetime.datetime.utcnow()
         self.updated_at = datetime.datetime.utcnow()
+
 
 class FavoriteContent(Base):
     """Tracks content items marked as favorite by users."""
