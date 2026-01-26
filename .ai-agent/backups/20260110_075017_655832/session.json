@@ -1,0 +1,56 @@
+{
+  "session_id": "20260110_075017_655832",
+  "created_at": "2026-01-10T07:50:17.655832",
+  "description": "Agent Mode commit: 8 files",
+  "backups": [
+    {
+      "original_path": "app/database.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260110_075017_655832\\app_database.py",
+      "created_at": "2026-01-10T07:50:17.657830",
+      "file_size": 7630,
+      "session_id": "20260110_075017_655832"
+    },
+    {
+      "original_path": "app/config.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260110_075017_655832\\app_config.py",
+      "created_at": "2026-01-10T07:50:17.659830",
+      "file_size": 1111,
+      "session_id": "20260110_075017_655832"
+    },
+    {
+      "original_path": "app/cli/commands.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260110_075017_655832\\app_cli_commands.py",
+      "created_at": "2026-01-10T07:50:17.661830",
+      "file_size": 7942,
+      "session_id": "20260110_075017_655832"
+    },
+    {
+      "original_path": "app/sources/habr.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260110_075017_655832\\app_sources_habr.py",
+      "created_at": "2026-01-10T07:50:17.662831",
+      "file_size": 3021,
+      "session_id": "20260110_075017_655832"
+    },
+    {
+      "original_path": "app/services/aggregator.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260110_075017_655832\\app_services_aggregator.py",
+      "created_at": "2026-01-10T07:50:17.663831",
+      "file_size": 6634,
+      "session_id": "20260110_075017_655832"
+    },
+    {
+      "original_path": "app/services/recommender.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260110_075017_655832\\app_services_recommender.py",
+      "created_at": "2026-01-10T07:50:17.665831",
+      "file_size": 3194,
+      "session_id": "20260110_075017_655832"
+    },
+    {
+      "original_path": "app/interactive.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260110_075017_655832\\app_interactive.py",
+      "created_at": "2026-01-10T07:50:17.666830",
+      "file_size": 27864,
+      "session_id": "20260110_075017_655832"
+    }
+  ]
+}

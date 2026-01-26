@@ -1,0 +1,28 @@
+{
+  "session_id": "20260112_065137_639173",
+  "created_at": "2026-01-12T06:51:37.639173",
+  "description": "Agent Mode commit: 3 files",
+  "backups": [
+    {
+      "original_path": ".env.example",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260112_065137_639173\\.env.example",
+      "created_at": "2026-01-12T06:51:37.654735",
+      "file_size": 295,
+      "session_id": "20260112_065137_639173"
+    },
+    {
+      "original_path": "app/services/email_sender.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260112_065137_639173\\app_services_email_sender.py",
+      "created_at": "2026-01-12T06:51:37.654735",
+      "file_size": 4875,
+      "session_id": "20260112_065137_639173"
+    },
+    {
+      "original_path": "app/config.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260112_065137_639173\\app_config.py",
+      "created_at": "2026-01-12T06:51:37.659851",
+      "file_size": 1809,
+      "session_id": "20260112_065137_639173"
+    }
+  ]
+}

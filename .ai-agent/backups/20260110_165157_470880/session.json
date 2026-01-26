@@ -1,0 +1,35 @@
+{
+  "session_id": "20260110_165157_470880",
+  "created_at": "2026-01-10T16:51:57.470880",
+  "description": "Agent Mode commit: 4 files",
+  "backups": [
+    {
+      "original_path": "app/database.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260110_165157_470880\\app_database.py",
+      "created_at": "2026-01-10T16:51:57.472881",
+      "file_size": 11431,
+      "session_id": "20260110_165157_470880"
+    },
+    {
+      "original_path": "app/config.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260110_165157_470880\\app_config.py",
+      "created_at": "2026-01-10T16:51:57.474881",
+      "file_size": 1418,
+      "session_id": "20260110_165157_470880"
+    },
+    {
+      "original_path": "app/sources/habr.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260110_165157_470880\\app_sources_habr.py",
+      "created_at": "2026-01-10T16:51:57.477873",
+      "file_size": 5718,
+      "session_id": "20260110_165157_470880"
+    },
+    {
+      "original_path": "app/services/email_sender.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260110_165157_470880\\app_services_email_sender.py",
+      "created_at": "2026-01-10T16:51:57.478878",
+      "file_size": 3923,
+      "session_id": "20260110_165157_470880"
+    }
+  ]
+}

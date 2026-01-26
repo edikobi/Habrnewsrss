@@ -1,0 +1,14 @@
+{
+  "session_id": "20260116_000546_209656",
+  "created_at": "2026-01-16T00:05:46.209656",
+  "description": "Agent Mode commit: 1 files",
+  "backups": [
+    {
+      "original_path": "app/services/aggregator.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260116_000546_209656\\app_services_aggregator.py",
+      "created_at": "2026-01-16T00:05:46.211653",
+      "file_size": 16303,
+      "session_id": "20260116_000546_209656"
+    }
+  ]
+}

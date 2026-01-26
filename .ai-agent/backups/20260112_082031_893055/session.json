@@ -1,0 +1,63 @@
+{
+  "session_id": "20260112_082031_893055",
+  "created_at": "2026-01-12T08:20:31.893055",
+  "description": "Agent Mode commit: 8 files",
+  "backups": [
+    {
+      "original_path": "app/database.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260112_082031_893055\\app_database.py",
+      "created_at": "2026-01-12T08:20:31.895054",
+      "file_size": 13522,
+      "session_id": "20260112_082031_893055"
+    },
+    {
+      "original_path": "app/sources/base.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260112_082031_893055\\app_sources_base.py",
+      "created_at": "2026-01-12T08:20:31.897053",
+      "file_size": 1627,
+      "session_id": "20260112_082031_893055"
+    },
+    {
+      "original_path": "app/sources/youtube.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260112_082031_893055\\app_sources_youtube.py",
+      "created_at": "2026-01-12T08:20:31.900053",
+      "file_size": 4573,
+      "session_id": "20260112_082031_893055"
+    },
+    {
+      "original_path": "app/sources/habr.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260112_082031_893055\\app_sources_habr.py",
+      "created_at": "2026-01-12T08:20:31.902054",
+      "file_size": 8061,
+      "session_id": "20260112_082031_893055"
+    },
+    {
+      "original_path": "app/sources/coursera.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260112_082031_893055\\app_sources_coursera.py",
+      "created_at": "2026-01-12T08:20:31.904054",
+      "file_size": 1718,
+      "session_id": "20260112_082031_893055"
+    },
+    {
+      "original_path": "app/cli/commands.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260112_082031_893055\\app_cli_commands.py",
+      "created_at": "2026-01-12T08:20:31.905054",
+      "file_size": 11434,
+      "session_id": "20260112_082031_893055"
+    },
+    {
+      "original_path": "app/services/aggregator.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260112_082031_893055\\app_services_aggregator.py",
+      "created_at": "2026-01-12T08:20:31.906053",
+      "file_size": 13854,
+      "session_id": "20260112_082031_893055"
+    },
+    {
+      "original_path": "app/interactive.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260112_082031_893055\\app_interactive.py",
+      "created_at": "2026-01-12T08:20:31.908055",
+      "file_size": 47962,
+      "session_id": "20260112_082031_893055"
+    }
+  ]
+}

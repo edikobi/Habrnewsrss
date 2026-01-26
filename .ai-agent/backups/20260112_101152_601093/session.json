@@ -1,0 +1,14 @@
+{
+  "session_id": "20260112_101152_601093",
+  "created_at": "2026-01-12T10:11:52.601093",
+  "description": "Agent Mode commit: 1 files",
+  "backups": [
+    {
+      "original_path": "app/sources/habr.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260112_101152_601093\\app_sources_habr.py",
+      "created_at": "2026-01-12T10:11:52.603092",
+      "file_size": 7832,
+      "session_id": "20260112_101152_601093"
+    }
+  ]
+}

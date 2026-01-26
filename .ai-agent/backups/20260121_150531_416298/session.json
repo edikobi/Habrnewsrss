@@ -1,0 +1,21 @@
+{
+  "session_id": "20260121_150531_416298",
+  "created_at": "2026-01-21T15:05:31.416298",
+  "description": "Agent Mode commit: 2 files",
+  "backups": [
+    {
+      "original_path": "main.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260121_150531_416298\\main.py",
+      "created_at": "2026-01-21T15:05:31.418306",
+      "file_size": 4270,
+      "session_id": "20260121_150531_416298"
+    },
+    {
+      "original_path": "app/cli/commands.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260121_150531_416298\\app_cli_commands.py",
+      "created_at": "2026-01-21T15:05:31.420301",
+      "file_size": 12861,
+      "session_id": "20260121_150531_416298"
+    }
+  ]
+}

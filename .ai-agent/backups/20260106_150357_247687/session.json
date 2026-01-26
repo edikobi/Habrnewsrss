@@ -1,0 +1,35 @@
+{
+  "session_id": "20260106_150357_247687",
+  "created_at": "2026-01-06T15:03:57.248687",
+  "description": "Agent Mode commit: 4 files",
+  "backups": [
+    {
+      "original_path": "app/interactive.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260106_150357_247687\\app_interactive.py",
+      "created_at": "2026-01-06T15:03:57.249687",
+      "file_size": 17618,
+      "session_id": "20260106_150357_247687"
+    },
+    {
+      "original_path": "app/services/aggregator.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260106_150357_247687\\app_services_aggregator.py",
+      "created_at": "2026-01-06T15:03:57.251686",
+      "file_size": 6079,
+      "session_id": "20260106_150357_247687"
+    },
+    {
+      "original_path": "main.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260106_150357_247687\\main.py",
+      "created_at": "2026-01-06T15:03:57.253686",
+      "file_size": 1397,
+      "session_id": "20260106_150357_247687"
+    },
+    {
+      "original_path": "app/cli/commands.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260106_150357_247687\\app_cli_commands.py",
+      "created_at": "2026-01-06T15:03:57.255687",
+      "file_size": 5807,
+      "session_id": "20260106_150357_247687"
+    }
+  ]
+}

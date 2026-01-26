@@ -1,0 +1,117 @@
+{
+  "version": "1.2",
+  "updated_at": "2026-01-24T00:25:01.358782+00:00",
+  "root_path": "C:\\Users\\Admin\\ag",
+  "total_files": 18,
+  "total_tokens": 21437,
+  "files": [
+    {
+      "name": "__init__.py",
+      "path": "app/__init__.py",
+      "tokens": 40,
+      "description": "Utility module with minimal significant logic."
+    },
+    {
+      "name": "__init__.py",
+      "path": "app/cli/__init__.py",
+      "tokens": 23,
+      "description": "Utility module with minimal significant logic."
+    },
+    {
+      "name": "commands.py",
+      "path": "app/cli/commands.py",
+      "tokens": 2849,
+      "description": "CLI interface for an educational content aggregator, managing user operations, content updates, and automated scheduling through database and external service integrations."
+    },
+    {
+      "name": "config.py",
+      "path": "app/config.py",
+      "tokens": 483,
+      "description": "Configuration management module using Pydantic and dotenv to centralize environment variables for API keys, database connections, and content sources."
+    },
+    {
+      "name": "__init__.py",
+      "path": "app/core/__init__.py",
+      "tokens": 6,
+      "description": "Utility module with minimal significant logic."
+    },
+    {
+      "name": "database.py",
+      "path": "app/database.py",
+      "tokens": 2971,
+      "description": "SQLAlchemy ORM models for a personalized learning platform, defining user profiles, content metadata, progress tracking, and preference management."
+    },
+    {
+      "name": "interactive.py",
+      "path": "app/interactive.py",
+      "tokens": 1929,
+      "description": "Interactive CLI for content aggregation and recommendation, integrating with database models for user, content, and interests management."
+    },
+    {
+      "name": "__init__.py",
+      "path": "app/services/__init__.py",
+      "tokens": 75,
+      "description": "Utility module with minimal significant logic."
+    },
+    {
+      "name": "aggregator.py",
+      "path": "app/services/aggregator.py",
+      "tokens": 2598,
+      "description": "Content aggregation service for user-specific feeds, integrating with user, content, and tagging models to update personalized content streams."
+    },
+    {
+      "name": "email_sender.py",
+      "path": "app/services/email_sender.py",
+      "tokens": 1158,
+      "description": "Automated email dispatch system for personalized user digests and notifications, integrating SMTP with environment-based configuration and structured logging."
+    },
+    {
+      "name": "exporter.py",
+      "path": "app/services/exporter.py",
+      "tokens": 1157,
+      "description": "Progress data export utility for JSON, Markdown, and DOCX generation, integrating with a database session for user and learning progress retrieval."
+    },
+    {
+      "name": "recommender.py",
+      "path": "app/services/recommender.py",
+      "tokens": 2052,
+      "description": "Content-based recommendation engine leveraging user history and item metadata, integrated with core user and content management models."
+    },
+    {
+      "name": "__init__.py",
+      "path": "app/sources/__init__.py",
+      "tokens": 76,
+      "description": "Utility module with minimal significant logic."
+    },
+    {
+      "name": "base.py",
+      "path": "app/sources/base.py",
+      "tokens": 371,
+      "description": "Abstract base class defining the interface and common logic for content source implementations, enabling standardized content ingestion across the system."
+    },
+    {
+      "name": "coursera.py",
+      "path": "app/sources/coursera.py",
+      "tokens": 587,
+      "description": "Data ingestion stub for Coursera API integration, requiring authentication and returning placeholder data for course retrieval."
+    },
+    {
+      "name": "habr.py",
+      "path": "app/sources/habr.py",
+      "tokens": 2649,
+      "description": "Habr RSS feed ingestion pipeline using BeautifulSoup for HTML parsing and requests for content retrieval, designed for integration into a data processing or content aggregation system."
+    },
+    {
+      "name": "youtube.py",
+      "path": "app/sources/youtube.py",
+      "tokens": 1547,
+      "description": "YouTube video ingestion pipeline via the YouTube Data API, with database integration for content and tag storage."
+    },
+    {
+      "name": "main.py",
+      "path": "main.py",
+      "tokens": 866,
+      "description": "Application entry point for CLI-based startup, database initialization, and user configuration management via Click."
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "session_id": "20260116_190438_320152",
+  "created_at": "2026-01-16T19:04:38.320152",
+  "description": "Agent Mode commit: 3 files",
+  "backups": [
+    {
+      "original_path": "app/services/aggregator.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260116_190438_320152\\app_services_aggregator.py",
+      "created_at": "2026-01-16T19:04:38.320152",
+      "file_size": 18690,
+      "session_id": "20260116_190438_320152"
+    },
+    {
+      "original_path": "app/sources/habr.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260116_190438_320152\\app_sources_habr.py",
+      "created_at": "2026-01-16T19:04:38.324763",
+      "file_size": 9487,
+      "session_id": "20260116_190438_320152"
+    },
+    {
+      "original_path": "app/interactive.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260116_190438_320152\\app_interactive.py",
+      "created_at": "2026-01-16T19:04:38.327804",
+      "file_size": 49719,
+      "session_id": "20260116_190438_320152"
+    }
+  ]
+}

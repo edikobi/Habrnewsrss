@@ -1,0 +1,49 @@
+{
+  "session_id": "20260121_172706_716166",
+  "created_at": "2026-01-21T17:27:06.716166",
+  "description": "Agent Mode commit: 6 files",
+  "backups": [
+    {
+      "original_path": "app/database.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260121_172706_716166\\app_database.py",
+      "created_at": "2026-01-21T17:27:06.716166",
+      "file_size": 15766,
+      "session_id": "20260121_172706_716166"
+    },
+    {
+      "original_path": "app/interactive.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260121_172706_716166\\app_interactive.py",
+      "created_at": "2026-01-21T17:27:06.722715",
+      "file_size": 54609,
+      "session_id": "20260121_172706_716166"
+    },
+    {
+      "original_path": "app/services/recommender.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260121_172706_716166\\app_services_recommender.py",
+      "created_at": "2026-01-21T17:27:06.723885",
+      "file_size": 9870,
+      "session_id": "20260121_172706_716166"
+    },
+    {
+      "original_path": "app/sources/habr.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260121_172706_716166\\app_sources_habr.py",
+      "created_at": "2026-01-21T17:27:06.724891",
+      "file_size": 15603,
+      "session_id": "20260121_172706_716166"
+    },
+    {
+      "original_path": "app/services/aggregator.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260121_172706_716166\\app_services_aggregator.py",
+      "created_at": "2026-01-21T17:27:06.725890",
+      "file_size": 28743,
+      "session_id": "20260121_172706_716166"
+    },
+    {
+      "original_path": "app/cli/commands.py",
+      "backup_path": "C:\\Users\\Admin\\ag\\.ai-agent\\backups\\20260121_172706_716166\\app_cli_commands.py",
+      "created_at": "2026-01-21T17:27:06.727890",
+      "file_size": 12882,
+      "session_id": "20260121_172706_716166"
+    }
+  ]
+}

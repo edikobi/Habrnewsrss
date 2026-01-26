@@ -1,0 +1,199 @@
+{
+  "root": "C:\\Users\\Admin\\ag",
+  "created_at": "2026-01-05T14:04:43.507503Z",
+  "updated_at": "2026-01-24T00:32:51.031216Z",
+  "total_files": 21,
+  "total_tokens": 40755,
+  "files": [
+    {
+      "path": "app\\__init__.py",
+      "type": "code/python",
+      "hash": "44d51f4bb719bc3f0e2f3e9f645ffe3a",
+      "tokens": 40,
+      "description": "Code file (no description available)",
+      "is_code": true,
+      "last_updated": ""
+    },
+    {
+      "path": "app\\cli\\__init__.py",
+      "type": "code/python",
+      "hash": "62097b00858693b755d3037d2f3712c2",
+      "tokens": 23,
+      "description": "Code file (no description available)",
+      "is_code": true,
+      "last_updated": ""
+    },
+    {
+      "path": "app\\cli\\commands.py",
+      "type": "code/python",
+      "hash": "f545cc667ba49cfb6df0416f2d313f2b",
+      "tokens": 2849,
+      "description": "Code file (no description available)",
+      "is_code": true,
+      "last_updated": "2026-01-21T14:27:35.963949Z"
+    },
+    {
+      "path": "app\\config.py",
+      "type": "code/python",
+      "hash": "54addbc4e3c8653c833e7250bc2421b3",
+      "tokens": 483,
+      "description": "Code file (no description available)",
+      "is_code": true,
+      "last_updated": "2026-01-12T03:51:55.717236Z"
+    },
+    {
+      "path": "app\\core\\__init__.py",
+      "type": "code/python",
+      "hash": "ef8a3adbf92094a21cb942b99eed46eb",
+      "tokens": 6,
+      "description": "Code file (no description available)",
+      "is_code": true,
+      "last_updated": ""
+    },
+    {
+      "path": "app\\database.py",
+      "type": "code/python",
+      "hash": "51630854ad74107d896a9be39d2f8e80",
+      "tokens": 2971,
+      "description": "Code file (no description available)",
+      "is_code": true,
+      "last_updated": "2026-01-23T23:58:18.434839Z"
+    },
+    {
+      "path": "app\\interactive.py",
+      "type": "code/python",
+      "hash": "2f5b90bb7b52c8311ec0ea7388b87ff5",
+      "tokens": 1929,
+      "description": "Code file (no description available)",
+      "is_code": true,
+      "last_updated": "2026-01-24T00:25:01.390772Z"
+    },
+    {
+      "path": "app\\services\\__init__.py",
+      "type": "code/python",
+      "hash": "d32961cde95047e74299c01157f3486d",
+      "tokens": 75,
+      "description": "Code file (no description available)",
+      "is_code": true,
+      "last_updated": ""
+    },
+    {
+      "path": "app\\services\\aggregator.py",
+      "type": "code/python",
+      "hash": "5978d238c31ec10300d32d6c09267c37",
+      "tokens": 2598,
+      "description": "Code file (no description available)",
+      "is_code": true,
+      "last_updated": "2026-01-21T14:27:35.963949Z"
+    },
+    {
+      "path": "app\\services\\email_sender.py",
+      "type": "code/python",
+      "hash": "87455bd1c8ad84f004da256169818b9a",
+      "tokens": 1158,
+      "description": "Code file (no description available)",
+      "is_code": true,
+      "last_updated": "2026-01-12T03:51:55.717236Z"
+    },
+    {
+      "path": "app\\services\\exporter.py",
+      "type": "code/python",
+      "hash": "51a5067b0e42f8535aa07cc64521bd8e",
+      "tokens": 1157,
+      "description": "Code file (no description available)",
+      "is_code": true,
+      "last_updated": "2026-01-12T09:54:33.544707Z"
+    },
+    {
+      "path": "app\\services\\recommender.py",
+      "type": "code/python",
+      "hash": "d72f6bfd45bfd3e145a78379ec6b495e",
+      "tokens": 2052,
+      "description": "Code file (no description available)",
+      "is_code": true,
+      "last_updated": "2026-01-21T14:27:35.963949Z"
+    },
+    {
+      "path": "app\\sources\\__init__.py",
+      "type": "code/python",
+      "hash": "9a9a7d5cd98f38cd8f8e8d5785d6e129",
+      "tokens": 76,
+      "description": "Code file (no description available)",
+      "is_code": true,
+      "last_updated": ""
+    },
+    {
+      "path": "app\\sources\\base.py",
+      "type": "code/python",
+      "hash": "ada5a8f05f63f630e1cacf68b0e27894",
+      "tokens": 371,
+      "description": "Code file (no description available)",
+      "is_code": true,
+      "last_updated": "2026-01-12T05:20:56.577481Z"
+    },
+    {
+      "path": "app\\sources\\coursera.py",
+      "type": "code/python",
+      "hash": "1a3188e1b2099313c71e58013f34acb7",
+      "tokens": 587,
+      "description": "Code file (no description available)",
+      "is_code": true,
+      "last_updated": "2026-01-12T05:20:56.577481Z"
+    },
+    {
+      "path": "app\\sources\\habr.py",
+      "type": "code/python",
+      "hash": "61fd5db2049b9d91e537882456b4303f",
+      "tokens": 2649,
+      "description": "Code file (no description available)",
+      "is_code": true,
+      "last_updated": "2026-01-24T00:25:01.390772Z"
+    },
+    {
+      "path": "app\\sources\\youtube.py",
+      "type": "code/python",
+      "hash": "cc95e6bcc5dfdda8a22f82c4634d1b7e",
+      "tokens": 1547,
+      "description": "Code file (no description available)",
+      "is_code": true,
+      "last_updated": "2026-01-12T05:20:56.577481Z"
+    },
+    {
+      "path": "exports\\172_Перевод_Без_работы_не_останемся_к_2030_году_ИИ_доб.md",
+      "type": "text/md",
+      "hash": "d80e2385b4a7ace461084b62222fb22e",
+      "tokens": 7371,
+      "description": "This file is an exported educational content article from the Habr platform, stored as a Markdown document. It contains a translated article about seven new AI-related professions predicted to emerge by 2030, including detailed metadata about the source, publication date, difficulty level, and tags. The file serves as a content item within the educational aggregator system, where it would be stored, categorized, and potentially recommended to users based on their interests in AI, big data, and machine learning topics.",
+      "is_code": false,
+      "last_updated": "2026-01-21T12:14:27.904331Z"
+    },
+    {
+      "path": "exports\\23_GigaChat_3_Ultra_Preview__тяжёлый_open_source.md",
+      "type": "text/md",
+      "hash": "71d177d5f4f2a8a0fcd08d94b405c075",
+      "tokens": 11811,
+      "description": "This file is an exported educational content article from the Habr platform, stored as a Markdown document. It contains a detailed technical overview of SberDevices' GigaChat 3 Ultra Preview, a large-scale open-source language model, covering its architecture, training process, performance benchmarks, and features. The file serves as a knowledge resource within the content aggregation system, likely ingested via the Habr source module for user consumption, recommendations, or digest generation.",
+      "is_code": false,
+      "last_updated": "2026-01-12T09:00:02.636592Z"
+    },
+    {
+      "path": "main.py",
+      "type": "code/python",
+      "hash": "7fbbad275771390d1276028b3b5311aa",
+      "tokens": 866,
+      "description": "Application entry point for CLI-based startup, database initialization, and user configuration management via Click.",
+      "is_code": true,
+      "last_updated": "2026-01-21T12:05:51.934341Z"
+    },
+    {
+      "path": "requirements.txt",
+      "type": "text/txt",
+      "hash": "7c72d9fc8e556a74752651b9a091dd66",
+      "tokens": 136,
+      "description": "This file is the project's dependency manifest specifying Python packages required for the educational content aggregation platform. It lists core dependencies for database management (SQLAlchemy), HTTP requests (requests), content parsing (feedparser, beautifulsoup4), YouTube API integration (google-api-python-client), configuration (pydantic-settings, python-dotenv), CLI framework (click), and UI enhancement (colorama). Optional development dependencies include Alembic for database migrations and pytest for testing, providing a complete environment setup for both production and development workflows.",
+      "is_code": false,
+      "last_updated": "2026-01-06T12:33:23.694430Z"
+    }
+  ],
+  "errors": []
+}
