@@ -26,5 +26,5 @@
 
 1.  **Клонирование репозитория:**
     ```bash
-    git clone https://github.com/your-repo/edu-aggregator.git
-    cd edu-aggregator
+    git clone https://github.com/edikobi/Habrnewsrss.git
+    cd Habrnewsrss
