@@ -55,25 +55,25 @@ def _check_missed_auto_downloads() -> None:
         aggregator = ContentAggregator(db_session=session)
         
         for user in users_with_auto:
-            user_settings = user.settings
-            if not user_settings or user_settings.auto_download_hour is None:
+            settings_obj = user.settings
+            if not settings_obj or settings_obj.auto_download_hour is None:
                 continue
             
             # Проверить, нужна ли загрузка
             should_download = False
             
-            if user_settings.last_auto_download is None:
+            if settings_obj.last_auto_download is None:
                 # Никогда не загружали - загрузить
                 should_download = True
             else:
                 # Проверить, прошёл ли назначенный час с последней загрузки
-                last_download_date = user_settings.last_auto_download.date()
+                last_download_date = settings_obj.last_auto_download.date()
                 today = now.date()
                 
                 if last_download_date < today:
                     # Последняя загрузка была вчера или раньше
                     # Проверить, прошёл ли уже назначенный час сегодня
-                    if now.hour >= user_settings.auto_download_hour:
+                    if now.hour >= settings_obj.auto_download_hour:
                         should_download = True
             
             if should_download:
@@ -95,24 +95,30 @@ def _check_missed_auto_downloads() -> None:
                 # Сортировать по дате (свежие первыми)
                 articles.sort(key=lambda x: x.published_at or datetime.min, reverse=True)
                 
-                # Сохранить только новые статьи
+                # Сохранить только новые статьи с кэшем тегов
                 saved_count = 0
                 saved_titles = []
+                tag_cache = {}  # Кэш для предотвращения дублирования тегов
+                
                 for item in articles:
                     exists = session.query(ContentItem).filter_by(
                         source_id=item.source_id, platform=item.platform
                     ).first()
                     if not exists:
-                        # Обработка тегов
+                        # Обработка тегов с кэшем
                         new_tags = []
                         for tag in (item.tags or []):
                             tag_name = tag.name.lower() if tag.name else ""
                             if tag_name:
-                                db_tag = session.query(Tag).filter_by(name=tag_name).first()
-                                if not db_tag:
-                                    db_tag = Tag(name=tag_name)
-                                    session.add(db_tag)
-                                new_tags.append(db_tag)
+                                # Проверить кэш
+                                if tag_name not in tag_cache:
+                                    db_tag = session.query(Tag).filter_by(name=tag_name).first()
+                                    if not db_tag:
+                                        db_tag = Tag(name=tag_name)
+                                        session.add(db_tag)
+                                        session.flush()  # Немедленно сохранить тег в БД
+                                    tag_cache[tag_name] = db_tag
+                                new_tags.append(tag_cache[tag_name])
                         item.tags = new_tags
                         session.add(item)
                         saved_count += 1
@@ -131,7 +137,7 @@ def _check_missed_auto_downloads() -> None:
                         print(f"  ... и ещё {len(saved_titles) - 10} статей")
                 
                 # Обновить время последней загрузки
-                user_settings.last_auto_download = now
+                settings_obj.last_auto_download = now
                 session.commit()
                 
     except Exception as e:
@@ -139,6 +145,7 @@ def _check_missed_auto_downloads() -> None:
         session.rollback()
     finally:
         session.close()
+
 
 
 def main() -> None:

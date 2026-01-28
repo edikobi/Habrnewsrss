@@ -455,22 +455,27 @@ class InteractiveMenu:
         """Сохранить статьи в БД и обновить интересы пользователя."""
         saved_count = 0
         saved_items = []
+        tag_cache = {}  # Кэш для предотвращения дублирования тегов
 
         for item in articles:
             exists = self.session.query(ContentItem).filter_by(
                 source_id=item.source_id, platform=item.platform
             ).first()
             if not exists:
-                # Обработка тегов
+                # Обработка тегов с кэшем
                 new_tags = []
                 for tag in (item.tags or []):
                     tag_name = tag.name.lower() if tag.name else ""
                     if tag_name:
-                        db_tag = self.session.query(Tag).filter_by(name=tag_name).first()
-                        if not db_tag:
-                            db_tag = Tag(name=tag_name)
-                            self.session.add(db_tag)
-                        new_tags.append(db_tag)
+                        # Проверить кэш
+                        if tag_name not in tag_cache:
+                            db_tag = self.session.query(Tag).filter_by(name=tag_name).first()
+                            if not db_tag:
+                                db_tag = Tag(name=tag_name)
+                                self.session.add(db_tag)
+                                self.session.flush()  # Немедленно сохранить тег в БД
+                            tag_cache[tag_name] = db_tag
+                        new_tags.append(tag_cache[tag_name])
                 item.tags = new_tags
                 self.session.add(item)
                 saved_items.append(item)
